@@ -35,20 +35,36 @@ void System::removeTotalMomentum() {
     }
 }
 
-void System::createFCCLattice(int numberOfUnitCellsEachDimension, double latticeConstant, double temperature) {
-    // You should implement this function properly. Right now, 100 atoms are created uniformly placed in the system of size (10, 10, 10).
+void System::createFCCLattice(int n_cells, double b, double temperature) {
+    vec3 cell_origin = vec3(0, 0, 0);
 
-    for(int i=0; i<100; i++) {
-        Atom *atom = new Atom(UnitConverter::massFromSI(6.63352088e-26));
-        double x = Random::nextDouble(0, 10); // random number in the interval [0,10]
-        double y = Random::nextDouble(0, 10);
-        double z = Random::nextDouble(0, 10);
-        atom->position.set(x,y,z);
-        atom->image = atom->position;
-        atom->resetVelocityMaxwellian(temperature);
-        m_atoms.push_back(atom);
+    vec3 r_1 = vec3( 0,  0,  0);
+    vec3 r_2 = vec3(.5, .5,  0);
+    vec3 r_3 = vec3( 0, .5, .5);
+    vec3 r_4 = vec3(.5,  0, .5);
+
+    vector<vec3> basis = {r_1, r_2, r_3, r_4};
+
+    int n = 0;
+    for(int i=0; i< n_cells; i++) {
+        for(int j=0; j< n_cells; j++) {
+            for(int k=0; k< n_cells; k++) {
+
+                cell_origin = vec3(i, j, k);
+                for(vec3 r : basis){
+                    Atom *atom = new Atom(UnitConverter::massFromSI(6.63352088e-26));
+
+                    atom->position = (cell_origin + r) * b;
+                    atom->image = atom->position;
+                    atom->resetVelocityMaxwellian(temperature);
+                    m_atoms.push_back(atom);
+                }
+            }
+        }
     }
-    setSystemSize(vec3(10, 10, 10)); // Remember to set the correct system size!
+
+    float cell_length = b * n_cells;
+    setSystemSize(vec3(cell_length, cell_length, cell_length));
 }
 
 void System::calculateForces() {

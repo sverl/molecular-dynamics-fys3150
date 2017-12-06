@@ -41,9 +41,9 @@ void IO::saveState(System &system)
         file << "The is an optional comment line that can be empty. The reason we use H is so particles get smaller in Ovito" << endl;
         for(Atom *atom : system.atoms()) {
             file << "H " <<
-                    UnitConverter::lengthToAngstroms(atom->position.x()) << " " <<
-                    UnitConverter::lengthToAngstroms(atom->position.y()) << " " <<
-                    UnitConverter::lengthToAngstroms(atom->position.z()) << "\n";
+                    UnitConverter::lengthToAngstroms(atom->image.x()) << " " <<
+                    UnitConverter::lengthToAngstroms(atom->image.y()) << " " <<
+                    UnitConverter::lengthToAngstroms(atom->image.z()) << "\n";
         }
     }
 }
