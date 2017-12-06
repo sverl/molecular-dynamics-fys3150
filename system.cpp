@@ -19,7 +19,11 @@ System::~System()
 }
 
 void System::applyPeriodicBoundaryConditions() {
-    // Read here: http://en.wikipedia.org/wiki/Periodic_boundary_conditions#Practical_implementation:_continuity_and_the_minimum_image_convention
+    for(Atom *atom : m_atoms) {
+        for(int i=0; i<3; i++) {
+            atom->image[i] = fmod(atom->image[i], m_systemSize[i]);
+        }
+    }
 }
 
 void System::removeTotalMomentum() {
@@ -35,6 +39,7 @@ void System::createFCCLattice(int numberOfUnitCellsEachDimension, double lattice
         double y = Random::nextDouble(0, 10);
         double z = Random::nextDouble(0, 10);
         atom->position.set(x,y,z);
+        atom->image = atom->position;
         atom->resetVelocityMaxwellian(temperature);
         m_atoms.push_back(atom);
     }
