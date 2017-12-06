@@ -27,7 +27,12 @@ void System::applyPeriodicBoundaryConditions() {
 }
 
 void System::removeTotalMomentum() {
-    // Find the total momentum and remove momentum equally on each atom so the total momentum becomes zero.
+    StatisticsSampler sampler;
+    vec3 avg_momentum = sampler.sampleMomentum(this) / m_atoms.size();
+
+    for(Atom *atom : m_atoms) {
+        atom->velocity -= avg_momentum / (atom->mass());
+    }
 }
 
 void System::createFCCLattice(int numberOfUnitCellsEachDimension, double latticeConstant, double temperature) {

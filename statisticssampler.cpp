@@ -2,6 +2,7 @@
 #include "statisticssampler.h"
 #include "lennardjones.h"
 #include <iostream>
+#include "math/vec3.h"
 
 using std::ofstream; using std::cout; using std::endl;
 
@@ -57,4 +58,13 @@ void StatisticsSampler::sampleTemperature(System &system)
 void StatisticsSampler::sampleDensity(System &system)
 {
 
+}
+
+vec3 StatisticsSampler::sampleMomentum(System *system)
+{
+    m_momentum.zeros();
+    for(Atom *atom : system->atoms()) {
+        m_momentum += atom->velocity * atom->mass();
+    }
+    return m_momentum;
 }
