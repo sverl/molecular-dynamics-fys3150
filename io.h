@@ -4,17 +4,16 @@
 class System;
 using std::ofstream;
 
-class IO
-{
-private:
-    ofstream file;
-public:
-    IO(const char *filename);
-    ~IO();
+class IO {
+ private:
+  ofstream file;
 
-    void saveState(System &system);
-    void open(const char *filename);
-    void close();
+ public:
+  IO(const char* filename);
+  ~IO();
 
+  void saveState(System& system);
+  void open(const char* filename);
+  void close();
 };
 #endif

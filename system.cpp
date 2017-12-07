@@ -5,77 +5,72 @@
 #include "unitconverter.h"
 #include "math/random.h"
 
-System::System()
-{
+System::System() {}
 
-}
-
-System::~System()
-{
-    for(Atom *atom : m_atoms) {
-        delete atom;
-    }
-    m_atoms.clear();
+System::~System() {
+  for (Atom* atom : m_atoms) {
+    delete atom;
+  }
+  m_atoms.clear();
 }
 
 void System::applyPeriodicBoundaryConditions() {
-    for(Atom *atom : m_atoms) {
-        for(int i=0; i<3; i++) {
-            atom->image[i] = fmod(atom->image[i], m_systemSize[i]);
-        }
+  for (Atom* atom : m_atoms) {
+    for (int i = 0; i < 3; i++) {
+      atom->image[i] = fmod(atom->image[i], m_systemSize[i]);
     }
+  }
 }
 
 void System::removeTotalMomentum() {
-    StatisticsSampler sampler;
-    vec3 avg_momentum = sampler.sampleMomentum(this) / m_atoms.size();
+  StatisticsSampler sampler;
+  vec3 avg_momentum = sampler.sampleMomentum(this) / m_atoms.size();
 
-    for(Atom *atom : m_atoms) {
-        atom->velocity -= avg_momentum / (atom->mass());
-    }
+  for (Atom* atom : m_atoms) {
+    atom->velocity -= avg_momentum / (atom->mass());
+  }
 }
 
 void System::createFCCLattice(int n_cells, double b, double temperature) {
-    vec3 cell_origin = vec3(0, 0, 0);
+  vec3 cell_origin = vec3(0, 0, 0);
 
-    vec3 r_1 = vec3( 0,  0,  0);
-    vec3 r_2 = vec3(.5, .5,  0);
-    vec3 r_3 = vec3( 0, .5, .5);
-    vec3 r_4 = vec3(.5,  0, .5);
+  vec3 r_1 = vec3(0, 0, 0);
+  vec3 r_2 = vec3(.5, .5, 0);
+  vec3 r_3 = vec3(0, .5, .5);
+  vec3 r_4 = vec3(.5, 0, .5);
 
-    vector<vec3> basis = {r_1, r_2, r_3, r_4};
+  vector<vec3> basis = {r_1, r_2, r_3, r_4};
 
-    int n = 0;
-    for(int i=0; i< n_cells; i++) {
-        for(int j=0; j< n_cells; j++) {
-            for(int k=0; k< n_cells; k++) {
+  for (int i = 0; i < n_cells; i++) {
+    for (int j = 0; j < n_cells; j++) {
+      for (int k = 0; k < n_cells; k++) {
+        cell_origin = vec3(i, j, k);
+        for (vec3 r : basis) {
+          Atom* atom = new Atom(UnitConverter::massFromSI(6.63352088e-26));
 
-                cell_origin = vec3(i, j, k);
-                for(vec3 r : basis){
-                    Atom *atom = new Atom(UnitConverter::massFromSI(6.63352088e-26));
-
-                    atom->position = (cell_origin + r) * b;
-                    atom->image = atom->position;
-                    atom->resetVelocityMaxwellian(temperature);
-                    m_atoms.push_back(atom);
-                }
-            }
+          atom->position = (cell_origin + r) * b;
+          atom->image = atom->position;
+          atom->resetVelocityMaxwellian(temperature);
+          m_atoms.push_back(atom);
         }
+      }
     }
+  }
 
-    float cell_length = b * n_cells;
-    setSystemSize(vec3(cell_length, cell_length, cell_length));
+  float cell_length = b * n_cells;
+  setSystemSize(vec3(cell_length, cell_length, cell_length));
 }
 
 void System::calculateForces() {
-    for(Atom *atom : m_atoms) {
-        atom->resetForce();
-    }
-    m_potential.calculateForces(*this); // this is a pointer, *this is a reference to this object
+  for (Atom* atom : m_atoms) {
+    atom->resetForce();
+  }
+  m_potential.calculateForces(
+      *this);  // this is a pointer, *this is a reference to this object
 }
 
 void System::step(double dt) {
-    m_integrator.integrate(*this, dt);
-    m_steps++;
-    m_time += dt;
+  m_integrator.integrate(*this, dt);
+  m_steps++;
+  m_time += dt;
 }
