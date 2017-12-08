@@ -11,23 +11,23 @@
 
 using namespace std;
 
-int main(int numberOfArguments, char** argumentList) {
+int main(int argc, char** argv) {
   int n_cells = 5;
   double temp_init =
       UnitConverter::temperatureFromSI(300.0);          // measured in Kelvin
   double b = UnitConverter::lengthFromAngstroms(5.26);  // measured in angstroms
 
   // If a first argument is provided, it is the number of unit cells
-  if (numberOfArguments > 1)
-    n_cells = atoi(argumentList[1]);
+  if (argc > 1)
+    n_cells = atoi(argv[1]);
   // If a second argument is provided, it is the initial temperature (measured
   // in kelvin)
-  if (numberOfArguments > 2)
-    temp_init = UnitConverter::temperatureFromSI(atof(argumentList[2]));
+  if (argc > 2)
+    temp_init = UnitConverter::temperatureFromSI(atof(argv[2]));
   // If a third argument is provided, it is the lattice constant determining the
   // density (measured in angstroms)
-  if (numberOfArguments > 3)
-    b = UnitConverter::lengthFromAngstroms(atof(argumentList[3]));
+  if (argc > 3)
+    b = UnitConverter::lengthFromAngstroms(atof(argv[3]));
 
   double dt = UnitConverter::timeFromSI(1e-15);  // Measured in seconds.
 
@@ -43,13 +43,15 @@ int main(int numberOfArguments, char** argumentList) {
        << " K" << endl;
 
   System system;
-    system.createFCCLattice(n_cells, b, temp_init);
-
+  system.createFCCLattice(n_cells, b, temp_init);
   system.potential().setEpsilon(1);
   system.potential().setSigma(UnitConverter::lengthFromAngstroms(3.405));
+
   system.removeTotalMomentum();
 
-  StatisticsSampler statisticsSampler;
+  cout << "Cell size is " << system.systemSize() << endl;
+
+  StatisticsSampler sampler;
   IO movie("movie.xyz");  // To write the state to file
 
   cout << setw(16) << "Timestep" << setw(16) << "Time" << setw(16)
@@ -57,16 +59,15 @@ int main(int numberOfArguments, char** argumentList) {
        << "PotentialEnergy" << setw(16) << "TotalEnergy" << endl;
   for (int timestep = 0; timestep < 10000; timestep++) {
     system.step(dt);
-    statisticsSampler.sample(system);
+    sampler.sample(system);
     if (timestep % 100 == 0) {
       // Print the timestep every 100 timesteps
-      cout << setw(16) << system.steps() << setw(16) << system.time()
-           << setw(16) << statisticsSampler.temperature() << setw(16)
-           << statisticsSampler.kineticEnergy() << setw(16)
-           << statisticsSampler.potentialEnergy() << setw(16)
-           << statisticsSampler.totalEnergy() << endl;
-
-
+      cout << setw(16) << system.steps()   //
+           << setw(16) << system.time()    //
+           << setw(16) << sampler.temp()   //
+           << setw(16) << sampler.E_kin()  //
+           << setw(16) << sampler.E_pot()  //
+           << setw(16) << sampler.E_tot() << endl;
     }
     movie.saveState(system);
   }
