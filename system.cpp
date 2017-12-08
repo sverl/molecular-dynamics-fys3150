@@ -17,7 +17,9 @@ System::~System() {
 void System::applyPeriodicBoundaryConditions() {
   for (Atom* atom : m_atoms) {
     for (int i = 0; i < 3; i++) {
-      atom->image[i] = fmod(atom->image[i], m_systemSize[i]);
+      float img = atom->image[i];
+      float lim = m_systemSize[i];
+      atom->image[i] = img - lim * floor(img / lim);
     }
   }
 }
