@@ -26,7 +26,8 @@ void System::applyPeriodicBoundaryConditions() {
 
 void System::removeTotalMomentum() {
   StatisticsSampler sampler;
-  vec3 avg_momentum = sampler.sampleMomentum(this) / m_atoms.size();
+  sampler.sampleMomentum(*this);
+  vec3 avg_momentum = sampler.momentum() / m_atoms.size();
 
   for (Atom* atom : m_atoms) {
     atom->velocity -= avg_momentum / (atom->mass());
