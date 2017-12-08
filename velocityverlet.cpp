@@ -10,7 +10,7 @@ void VelocityVerlet::integrate(System& system, double dt) {
 
   for (Atom* atom : system.atoms()) {
     atom->velocity += atom->force * 0.5 * dt / atom->mass();
-    atom->position += atom->velocity * dt / atom->mass();
+    atom->position += atom->velocity * dt;
     atom->image = atom->position;
   }
   system.applyPeriodicBoundaryConditions();
