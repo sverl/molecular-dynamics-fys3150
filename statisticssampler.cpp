@@ -25,12 +25,12 @@ void StatisticsSampler::saveToFile(System& system) {
     }
   }
 
-  m_file << system.steps() << setw(10)
-         << UnitConverter::timeToSI(system.time()) * 1e12 << setw(10)
-         << UnitConverter::temperatureToSI(temp()) << setw(10)
-         << UnitConverter::energyToEv(E_kin()) << setw(10)
-         << UnitConverter::energyToEv(E_pot()) << setw(10)
-         << UnitConverter::energyToEv(E_tot()) << setw(10)
+  m_file << system.steps() << setw(11)
+         << UnitConverter::timeToSI(system.time()) * 1e12 << setw(11)
+         << UnitConverter::temperatureToSI(temp()) << setw(11)
+         << UnitConverter::energyToEv(E_kin()) << setw(11)
+         << UnitConverter::energyToEv(E_pot()) << setw(11)
+         << UnitConverter::energyToEv(E_tot()) << setw(11)
          << UnitConverter::lengthToAngstroms(meanSquareDev()) << endl;
 }
 
