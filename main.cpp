@@ -68,8 +68,10 @@ int main(int argc, char** argv) {
            << setw(16) << sampler.E_kin()  //
            << setw(16) << sampler.E_pot()  //
            << setw(16) << sampler.E_tot() << endl;
+
+      sampler.saveToFile(system);
+      movie.saveState(system);
     }
-    movie.saveState(system);
   }
 
   movie.close();

@@ -42,7 +42,6 @@ void StatisticsSampler::sample(System& system) {
   sampleTemperature(system);
   sampleDensity(system);
   sampleMeanSquareDev(system);
-  saveToFile(system);
 }
 
 void StatisticsSampler::sampleKineticEnergy(System& system) {
