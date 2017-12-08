@@ -43,10 +43,10 @@ int main(int numberOfArguments, char** argumentList) {
        << " K" << endl;
 
   System system;
-  system.potential().setEpsilon(1.0);
-  system.potential().setSigma(1.0);
     system.createFCCLattice(n_cells, b, temp_init);
 
+  system.potential().setEpsilon(1);
+  system.potential().setSigma(UnitConverter::lengthFromAngstroms(3.405));
   system.removeTotalMomentum();
 
   StatisticsSampler statisticsSampler;
