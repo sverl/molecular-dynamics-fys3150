@@ -7,6 +7,7 @@ class Atom {
   float m_mass;
 
  public:
+  vec3 position_init;
   vec3 position;
   vec3 image;
   vec3 velocity;

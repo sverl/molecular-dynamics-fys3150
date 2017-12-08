@@ -3,10 +3,13 @@
 #include "lennardjones.h"
 #include <iostream>
 #include "math/vec3.h"
+#include "unitconverter.h"
+#include <iomanip>
 
 using std::ofstream;
 using std::cout;
 using std::endl;
+using std::setw;
 
 StatisticsSampler::StatisticsSampler() {}
 
@@ -22,7 +25,13 @@ void StatisticsSampler::saveToFile(System& system) {
     }
   }
 
-  // Print out values here
+  m_file << system.steps() << setw(10)
+         << UnitConverter::timeToSI(system.time()) * 1e12 << setw(10)
+         << UnitConverter::temperatureToSI(temperature()) << setw(10)
+         << UnitConverter::energyToEv(kineticEnergy()) << setw(10)
+         << UnitConverter::energyToEv(potentialEnergy()) << setw(10)
+         << UnitConverter::energyToEv(totalEnergy()) << setw(10)
+         << UnitConverter::lengthToAngstroms(meanSquareDev()) << endl;
 }
 
 void StatisticsSampler::sample(System& system) {
@@ -32,30 +41,38 @@ void StatisticsSampler::sample(System& system) {
   samplePotentialEnergy(system);
   sampleTemperature(system);
   sampleDensity(system);
+  sampleMeanSquareDev(system);
   saveToFile(system);
 }
 
 void StatisticsSampler::sampleKineticEnergy(System& system) {
-  m_kineticEnergy =
-      0;  // Remember to reset the value from the previous timestep
+  m_kineticEnergy = 0;
   for (Atom* atom : system.atoms()) {
+    m_kineticEnergy += 0.5 * atom->mass() * atom->velocity.lengthSquared();
   }
 }
 
 void StatisticsSampler::samplePotentialEnergy(System& system) {
-  m_potentialEnergy = system.potential().potentialEnergy();
+  m_potentialEnergy = system.potential().potentialEnergy(system);
 }
 
 void StatisticsSampler::sampleTemperature(System& system) {
-  // Hint: reuse the kinetic energy that we already calculated
+  m_temperature = 2 * m_kineticEnergy / (3 * system.atoms().size());
 }
 
 void StatisticsSampler::sampleDensity(System& system) {}
 
-vec3 StatisticsSampler::sampleMomentum(System* system) {
+void StatisticsSampler::sampleMomentum(System& system) {
   m_momentum.zeros();
-  for (Atom* atom : system->atoms()) {
+  for (Atom* atom : system.atoms()) {
     m_momentum += atom->velocity * atom->mass();
   }
-  return m_momentum;
+}
+
+void StatisticsSampler::sampleMeanSquareDev(System& system)
+{
+    m_meanSquareDev = 0;
+    for(Atom *atom : system.atoms()) {
+        m_meanSquareDev += (atom->position - atom->position_init).lengthSquared();
+    }
 }

@@ -14,6 +14,7 @@ class StatisticsSampler {
   double m_temperature = 0;
   double m_density = 0;
   vec3 m_momentum = vec3(0,0,0);
+  float m_meanSquareDev = 0;
 
  public:
   StatisticsSampler();
@@ -24,11 +25,13 @@ class StatisticsSampler {
   void sampleTemperature(System& system);
   void sampleDensity(System& system);
   void sampleMomentum(System& system);
+  void sampleMeanSquareDev(System& system);
   double kineticEnergy() { return m_kineticEnergy; }
   double potentialEnergy() { return m_potentialEnergy; }
   double totalEnergy() { return m_kineticEnergy + m_potentialEnergy; }
   double temperature() { return m_temperature; }
   double density() { return m_density; }
   vec3 momentum(){return m_momentum;}
+  double meanSquareDev() { return m_meanSquareDev; }
 };
 #endif

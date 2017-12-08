@@ -51,8 +51,9 @@ void System::createFCCLattice(int n_cells, double b, double temperature) {
         for (vec3 r : basis) {
           Atom* atom = new Atom(UnitConverter::massFromSI(6.63352088e-26));
 
-          atom->position = (cell_origin + r) * b;
-          atom->image = atom->position;
+          atom->position_init = (cell_origin + r) * b;
+          atom->position = atom->position_init;
+          atom->image = atom->position_init;
           atom->resetVelocityMaxwellian(temperature);
           m_atoms.push_back(atom);
         }
@@ -68,8 +69,7 @@ void System::calculateForces() {
   for (Atom* atom : m_atoms) {
     atom->resetForce();
   }
-  m_potential.calculateForces(
-      *this);  // this is a pointer, *this is a reference to this object
+  m_potential.calculateForces(*this);
 }
 
 void System::step(double dt) {
