@@ -18,7 +18,7 @@ class StatisticsSampler {
 
  public:
   StatisticsSampler();
-  void saveToFile(System& system);
+  void saveToFile(System& system, string filename);
   void sample(System& system);
   void sampleKineticEnergy(System& system);
   void samplePotentialEnergy(System& system);

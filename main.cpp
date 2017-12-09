@@ -42,6 +42,8 @@ int main(int argc, char** argv) {
   cout << "One unit of temperature is " << UnitConverter::temperatureToSI(1.0)
        << " K" << endl;
 
+  string filename = "statistics_" + to_string(temp_init) + ".txt";
+
   System system;
   system.createFCCLattice(n_cells, b, temp_init);
   system.potential().setEpsilon(1);
@@ -69,8 +71,8 @@ int main(int argc, char** argv) {
            << setw(16) << sampler.E_pot()  //
            << setw(16) << sampler.E_tot() << endl;
 
-      sampler.saveToFile(system);
       movie.saveState(system);
+      sampler.saveToFile(system, filename);
     }
   }
 

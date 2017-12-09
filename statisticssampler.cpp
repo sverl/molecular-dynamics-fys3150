@@ -13,11 +13,11 @@ using std::setw;
 
 StatisticsSampler::StatisticsSampler() {}
 
-void StatisticsSampler::saveToFile(System& system) {
+void StatisticsSampler::saveToFile(System& system, string filename) {
   // Save the statistical properties for each timestep for plotting etc.
   // First, open the file if it's not open already
   if (!m_file.good()) {
-    m_file.open("statistics.txt", ofstream::out);
+    m_file.open(filename, ofstream::out);
     // If it's still not open, something bad happened...
     if (!m_file.good()) {
       cout << "Error, could not open statistics.txt" << endl;
@@ -25,12 +25,12 @@ void StatisticsSampler::saveToFile(System& system) {
     }
   }
 
-  m_file << system.steps() << setw(11)
-         << UnitConverter::timeToSI(system.time()) * 1e12 << setw(11)
-         << UnitConverter::temperatureToSI(temp()) << setw(11)
-         << UnitConverter::energyToEv(E_kin()) << setw(11)
-         << UnitConverter::energyToEv(E_pot()) << setw(11)
-         << UnitConverter::energyToEv(E_tot()) << setw(11)
+  m_file << system.steps() << setw(13)
+         << UnitConverter::timeToSI(system.time()) * 1e12 << setw(13)
+         << UnitConverter::temperatureToSI(temp()) << setw(13)
+         << UnitConverter::energyToEv(E_kin()) << setw(13)
+         << UnitConverter::energyToEv(E_pot()) << setw(13)
+         << UnitConverter::energyToEv(E_tot()) << setw(13)
          << UnitConverter::lengthToAngstroms(meanSquareDev()) << endl;
 }
 
