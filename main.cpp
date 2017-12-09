@@ -64,9 +64,9 @@ int main(int argc, char** argv) {
        << "PotentialEnergy" << setw(16) << "TotalEnergy" << endl;
   for (int timestep = 0; timestep < timestep_max; timestep++) {
     system.step(dt);
-    sampler.sample(system);
     if (timestep % 100 == 0) {
       // Print the timestep every 100 timesteps
+      sampler.sample(system);
       cout << setw(16) << system.steps()   //
            << setw(16) << system.time()    //
            << setw(16) << sampler.temp()   //
