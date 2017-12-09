@@ -16,6 +16,7 @@ int main(int argc, char** argv) {
   double temp_init =
       UnitConverter::temperatureFromSI(300.0);          // measured in Kelvin
   double b = UnitConverter::lengthFromAngstroms(5.26);  // measured in angstroms
+  int timestep_max = 10000;
 
   // If a first argument is provided, it is the number of unit cells
   if (argc > 1)
@@ -28,6 +29,8 @@ int main(int argc, char** argv) {
   // density (measured in angstroms)
   if (argc > 3)
     b = UnitConverter::lengthFromAngstroms(atof(argv[3]));
+  if (argc > 4)
+    timestep_max = atoi(argv[4]);
 
   double dt = UnitConverter::timeFromSI(1e-15);  // Measured in seconds.
 
@@ -59,7 +62,7 @@ int main(int argc, char** argv) {
   cout << setw(16) << "Timestep" << setw(16) << "Time" << setw(16)
        << "Temperature" << setw(16) << "KineticEnergy" << setw(16)
        << "PotentialEnergy" << setw(16) << "TotalEnergy" << endl;
-  for (int timestep = 0; timestep < 10000; timestep++) {
+  for (int timestep = 0; timestep < timestep_max; timestep++) {
     system.step(dt);
     sampler.sample(system);
     if (timestep % 100 == 0) {
