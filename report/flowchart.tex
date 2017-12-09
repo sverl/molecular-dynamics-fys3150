@@ -1,0 +1,32 @@
+\tikzstyle{decision} = [diamond, draw, fill=yellow!20, text width=4.5em, text badly centered, inner sep=0pt]
+\tikzstyle{block} = [rectangle, draw, fill=blue!20, rounded corners, every text node part/.style={align=left}]
+\tikzstyle{end} = [circle, draw, fill=red!20, rounded corners, every text node part/.style={align=left}]
+\tikzstyle{line} = [draw, very thick, color=black!50, -latex']
+\tikzstyle{cloud} = [draw, ellipse,fill=red!20, node distance=2.5cm, minimum height=2em]
+
+\begin{tikzpicture}[node distance=3.5cm]
+	\node [end] (start) {start};
+	\node [block, below of=start] (init) {read command line arguments\\
+									  	  create face-centered cubic lattice\\
+								  	  	  \quad set Maxwell-Boltzmann distribution\\
+							  	  	  	  set Lennard-Jones potential\\
+						 	  	  	      correct frame of reference\\
+							  	  	      first integration step};
+	\node [block, below of=init] (verlet) {velocity Verlet integration\\
+							   			   update with periodic boundary conditions};
+	\node [decision, below of=verlet] (output) {output?};
+	\node [decision, below of=output] (last) {last step?};
+	\node [end, below of=last] (done) {stop};
+	\node [block, left of=output] (print) {sample system\\
+										   print stats\\
+									  	   print movie frame};
+
+	\path [line] (start) -- (init);
+	\path [line] (init) -- (verlet);
+	\path [line] (verlet) -- (output);
+	\path [line] (output) -- node [near start, above, color=black] {yes} (print);
+	\path [line] (last) -- node [near start, left, color=black] {yes} (done);
+	\path [line] (output) -- node [near start, left, color=black] {no} (last);
+	\path [line] (print) |- (last);
+	\path [line] (last) -| node [near start, above, color=black] {no} ++(45mm,0mm) |- (verlet);
+\end{tikzpicture}

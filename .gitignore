@@ -3,3 +3,11 @@ Makefile
 *.o
 *.pro.user
 *.xyz
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.log
+*.out
+*.run.xml
+*.synctex*
