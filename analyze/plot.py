@@ -31,19 +31,34 @@ print('\nDone!')
 
 # Read the data files generated (also previous runs) and do some statistics
 stat_files = glob.glob('statistics_*.txt')
+temps_init_files = np.zeros(len(stat_files))
 temps = np.zeros(len(stat_files))
 diffs = np.zeros(len(stat_files))
 for i, stat_file in enumerate(stat_files):
     stats = np.genfromtxt(stat_file).T
     steps, time, temp, E_kin, E_pot, E_tot, MSD = stats
+
+    temps_init_files[i] = float(stat_file[11:-4]) * 119.735
     temps[i] = np.mean(temp)
+
     a, b = np.polyfit(time, MSD, 1)
     diffs[i] = a / 6
 
 # Plot
 plt.rc('text', usetex=True)
 plt.rc('font', family='serif')
+
 plt.plot(temps, diffs, 'o', markerfacecolor='none')
 plt.xlabel(r'$T/\mathrm{K}$')
 plt.ylabel(r'$D/(\mathrm{\aa^2/ps})$')
-plt.savefig('melt.eps')
+plt.show()
+
+plt.plot(temps_init_files, temps, 'o', markerfacecolor='none')
+plt.xlabel(r'$T_i/\mathrm{K}$')
+plt.ylabel(r'$T/\mathrm{K}$')
+plt.show()
+
+plt.plot(temps_init_files, temps / temps_init_files, 'o', markerfacecolor='none')
+plt.xlabel(r'$T_i/\mathrm{K}$')
+plt.ylabel(r'$T/Ti/\mathrm{K}$')
+plt.show()
