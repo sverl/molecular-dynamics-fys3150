@@ -94,19 +94,19 @@
 \renewcommand{\epsilon}{\varepsilon}
 
 \begin{document}
-	\title{}
+	\title{The basics of molecular dynamics in the microcanonical ensemble}
 	\subtitle{\url{https://github.com/sverl/FYS3150-FYS4150}}
 	\author{Sverre Løyland}
 	\maketitle
 	
 	\begin{abstract}
-		
+		Code to perform molecular dynamics in the microcanonical ensemble has been implemented successfully and used to find the melting point of argon by calculating diffusion constants at different temperatures. The melting point was found to be a bit lower than \SI{320}{K}. 
 	\end{abstract}
 
 	\section{Introduction}
 	Molecular dynamics is computational method to derive thermodynamic properties of a system. By simulating a system over longer periods (on thermodynamic scale) and sampling quantities, certain properties can be calculated.
 	
-	This project explores the basics of molecular dynamics, in particular the melting of solid argon. Here, 500 \isotope*{18,Ar} atoms interacting in Lennard-Jones potentials initially in a face-centred cubic lattice are simulated, and the simulation is repeated at different temperatures to derive a melting point.
+	This project explores the basics of molecular dynamics, in particular the melting of solid argon. Here, 500 \isotope*{40,Ar} atoms interacting in Lennard-Jones potentials initially in a face-centred cubic lattice are simulated, and the simulation is repeated at different temperatures to derive a melting point.
 	
 	\section{Theory}
 	\subsection{Maxwell-Boltzmann distribution}
@@ -116,6 +116,20 @@
 	\begin{equation}
 		f_v(v_i) = \sqrt{\frac{m}{2\pi k_bT}}e^{-mv_i^2/2k_bT}.
 	\end{equation}
+	
+%	Let $F_v(v_x, v_y, v_z)$ be the probability distribution of the velocity. Because of the spherical symmetry, the distribution can be split into
+%	\begin{equation}
+%		F_v(v_x, v_y, v_z) = f_v(v_x)f_v(v_y)f_v(v_z)
+%	\end{equation}
+%	where $f_v(v)$ is the speed distribution. The derivative of $F_v$ can thus be expressed as
+%	\begin{align}
+%		\pdv{F_v}{v_x} &= \pdv{f_v}{v_x}f_v(v_y)f_v(v_z) \\
+%		\pdv{F_v}{v}\pdv{v}{v_x}&= \pdv{f_v}{v_x}f_v(v_y)f_v(v_z) 
+%	\shortintertext{Division by $F_v$ gives}
+%		\frac{1}{F_v}\pdv{F_v}{v}\pdv{v}{v_x}&= \frac{1}{f_v(v_x)}\pdv{f_v}{v_x} \\
+%		\pdv{F_v}{F_v}
+%	\end{align}
+	
 	\subsection{The equipartition theorem}
 	The equipartition theorem relates temperature to energy averages. For gas, the theorem says the energy $E$ is related to the temperature $T$ by
 	\begin{equation}
@@ -169,51 +183,53 @@
 	\end{align}
 	
 	\subsection{Periodic boundary conditions}
-	To avoid having to deal with special boundary conditions, periodic boundary conditions are chosen where the potentials are calculated using the minimum image convention, i.e interactions with the closest image of the particle. When particle distances become greater than than half the box size in either dimension, the particle image is shifted back into the cell.
+	To avoid having to deal with special boundary conditions, periodic boundary conditions are chosen where the potentials are calculated using the minimum image convention, i.e interactions with the closest image of the particle. This also allows in some sense for an simulation box of infinite size. When particle distances become greater than than half the box size in either dimension, the particle image is shifted back into the cell.
 	
 	However, care has to be taken when calculating properties based on distance such as diffusion. If only the images are saved, the particles can not diffuse more than a cell width in each direction so actual positions have to be calculated as well.
 	
 	\section{Implementation}
+	The molecular dynamics were implemented in \cpp\ based on a partially completed (almost spaghetti-like) code from \href{https://github.com/andeplane/molecular-dynamics-fys3150/tree/b0afed6bd84ecf0230146cc0a808ae6dd0c273e8}{andeplane on Github.com} with some erroneous code. \Cref{fig:flowchart} shows the code flow in the final implementation. The code does not output every integration step as writing to hard disk is slow. This also prevents some correlation in thermodynamic properties. When many simulations were done, the code to write the trajectory file was removed so save even more computation time.
 	
-	\begin{figure}
+	In addition, a script for running the simulations and analysing the results were written in Python 3 to extract the melting point. By linear regression of the mean square deviation over time, a diffusion constant is extracted together with the mean temperature. The diffusion constants are then plotted against the mean temperatures.
+	
+	\begin{figure}[p]
 		\centering
 		\input{flowchart.tex}
-		\caption{}
+		\caption{Flowchart for the final implementation of the molecular dynamics simulation.}
 		\label{fig:flowchart}	
 	\end{figure}
-
-	\begin{figure}
-		\centering
-		\includegraphics{melt.png}
-		\caption{}
-		\label{fig:melt}	
-	\end{figure}
-
-	\section{Introduction}
-	
-	
-	\section{Theory}
-	
-
-	\section{Computational methods}
-	
-	\subsection{Scaling}
-
-	
-	
-	
-	\section{Implementation}
-
 	
 	\section{Analysis}
+	In each simulation 500 \isotope*{40,Ar} atoms in a face-centred cubic lattice with lattice constance \SI{5.26}{\angstrom} ($\rho=500\cdot\SI{18}{amu}/(5\cdot\SI{5.26}{\angstrom}^3)=\SI{822}{kg/m^3}$) were simulated for \num{5001} integration steps with a time-step of \SI{1}{fs} at a range of different temperatures. First a wide range of temperatures were simulated to find the approximate melting point and then narrower ranges of temperatures were simulated until a satisfactory value could be read off. \Cref{fig:melt} shows the diffusion constants over temperatures. There is a very apparent kink at about \SI{320+-10}{K}. 
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=\textwidth]{melt.png}
+		\caption{Plot of diffusion constants over temperatures.}
+		\label{fig:melt}	
+	\end{figure}
+	
+	The diffusion constants are calculated from linear regression of the whole simulation, not just at equilibrium so if the solid melts at the end of the simulation, only a small diffusion constant is observed or not observed at all if the simulation never reaches equilibrium in the simulation time. This mean the melting point is lower then the kink.
+	
+	To induce melting and reach equilibrium faster, a set of random atoms can be removed. This is called the voids method. When more and more the atoms are removed, the observed melting points converges to a better estimate.
+	
+	To get a more accurate melting point range, a simulation in the canonical ensemble where the temperature is varied throughout the simulation can be used, but this requires implementation of a thermo-``stat'' that can adjust the temperature. The melting point can then be estimated from e.g. the density. However, since the temperature is changing, the system never reaches equilibrium and there will be hysteresis. By annealing, a corresponding result can be extracted for the freezing process, but this simulation ``lags'' in the opposite direction so the melting point have to be in-between the observed melting points.
+	
+	The melting point is difficult to compare to values in the literature as these are usually in the isothermal–isobaric ensemble. To do calculations in the ensemble, both a thermostat and a barostat would need to be implemented.
+	
+	The relation between the initial temperature and the final temperature is shown in \cref{fig:temps}. As can be seen, the temperature falls to about half of the initial temperature with slight variations depending on the whether the solid melts or not.
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[width=\textwidth]{temp_init.png}
+		\caption{Plot of ratio of temperatures and initial temperature over initial temperatures.}
+		\label{fig:temps}	
+	\end{figure}
 	
 	\section{Conclusion}
+	The desired algorithms were successfully implemented and a melting point extracted. The melting point is probably a bit below \SI{320}{K} for the conditions describes earlier. However, this value does not really represent a usefully quantity as it is in the microcanonical ensemble, but the code serves as a base to build better simulations.
 	
 	\printbibliography
 	
-	\appendix
-	\section{Figures}
-	
-
 	
 \end{document}
