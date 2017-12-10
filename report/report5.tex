@@ -75,6 +75,8 @@
 \usepackage{siunitx}
 \newcommand{\earth}{\oplus}
 \newcommand{\sun}{\odot}
+\usepackage{chemmacros}
+\chemsetup{modules=all}
 
 % Packages for referencing
 \usepackage{varioref}
@@ -89,6 +91,8 @@
 % Macro for typesetting big O-notation
 \newcommand{\bigO}[1]{\mathcal{O}(#1)}
 
+\renewcommand{\epsilon}{\varepsilon}
+
 \begin{document}
 	\title{}
 	\subtitle{\url{https://github.com/sverl/FYS3150-FYS4150}}
@@ -99,6 +103,77 @@
 		
 	\end{abstract}
 
+	\section{Introduction}
+	Molecular dynamics is computational method to derive thermodynamic properties of a system. By simulating a system over longer periods (on thermodynamic scale) and sampling quantities, certain properties can be calculated.
+	
+	This project explores the basics of molecular dynamics, in particular the melting of solid argon. Here, 500 \isotope*{18,Ar} atoms interacting in Lennard-Jones potentials initially in a face-centred cubic lattice are simulated, and the simulation is repeated at different temperatures to derive a melting point.
+	
+	\section{Theory}
+	\subsection{Maxwell-Boltzmann distribution}
+	The Maxwell-Boltzmann distributions are the probability distribution of the velocities, speeds and momenta of particles at equilibrium. The distribution assumes uncorrelated velocities and spherical symmetry of the distribution\footnote{Many sources says the particles need to non-interacting except in brief collisions, however this assumption is not necessary.}.
+	
+	The form of the distribution used in the simulations is the distribution for the velocity given by
+	\begin{equation}
+		f_v(v_i) = \sqrt{\frac{m}{2\pi k_bT}}e^{-mv_i^2/2k_bT}.
+	\end{equation}
+	\subsection{The equipartition theorem}
+	The equipartition theorem relates temperature to energy averages. For gas, the theorem says the energy $E$ is related to the temperature $T$ by
+	\begin{equation}
+		E = T + V = \frac32 Nk_bT+2\pi N\rho\int_0^\infty r^2U(r)g(r)\dd{r}
+	\end{equation}
+	where $T$ and $V$ are the kinetic and potential energy, $U$ is the (spherical symmetric) interaction potential and $g$ is the radial pair distribution function. 
+	
+	For an ideal gas where there are no interactions ($U=0,V=0$), this simplifies to	
+	\begin{equation}
+		E = T = \frac32Nk_b T.
+	\end{equation}
+	In the simulations, the kinetic energy is assumed to be much bigger than the potential energy so an ideal gas is a good approximation.
+	
+%	\subsection{Microcanonical ensemble}
+	
+	\subsection{Lennard-Jones potential}
+	The Lennard-Jones potential is a spherically symmetric potential describing the Pauli exchange interaction and London dispersion force. The Pauli exchange interaction is a quantum mechanical effect related to the Pauli exclusion principle and the London dispersion is related to polarisability. The potential is on the form
+	\begin{equation}
+		U(r) = 4\epsilon\left[\left(\frac{\sigma}{r}\right)^{12}-\left(\frac{\sigma}{r}\right)^6\right]
+	\end{equation}
+	where $\sigma$ is the zero-point of the potential, i.e approximately how close atoms get) and $\epsilon$ is the depth of the potential at the minimum at $\sqrt[6]{2}\sigma$.
+
+	The parameters can be fitted with experimental values to give a fairly accurate potential which is mathematically and computationally very simple.
+	
+	The corresponding force is given by
+	\begin{align}
+		\vb{F} &= -\grad{U(r)} \\
+		&= -\dv{U(r)}{r}\frac{\vb{r}}{r} \\
+		&= -4\epsilon\left[12\left(\frac{\sigma}{r}\right)^{11}\left(-\frac{\sigma}{r^2}\right)-6\left(\frac{\sigma}{r}\right)^5\left(-\frac{\sigma}{r^2}\right)\right]\frac{\vb{r}}{r} \\
+		&= 24\epsilon\left[\left(\frac{\sigma}{r}\right)^{12}-2\left(\frac{\sigma}{r}\right)^6\right]\frac{\vb{r}}{r^2} 
+	\end{align}
+
+	\subsection{Einstein diffusion relation}
+	The Einstein diffusion relation relates mean square deviation of particle positions to the time by
+	\begin{equation}
+		\expval{r^2(t)}=6Dt
+	\end{equation}
+	where $D$ is a diffusion constant varying with temperature. Intuitively, we know the diffusion is a lot lower in solids than in liquids and the diffusion constant is used as an indicator of a phase transition.
+
+	\section{Computational methods}
+	\subsection{Scaling}
+	By convention, the mass and length units of molecular dynamics are chosen to \SI{1}{amu} and \SI{1}{\angstrom}. The unit of energy is chosen to $\epsilon=\SI{1.65e-21}{J}$ and by using the scale factor $E=k_bT$, the temperature unit becomes \SI{119.8}{K}.
+	
+	\subsection{Velocity-Verlet integration}
+	A mathematically equivalent method to the Verlet method is the velocity-Verlet method. It incorporates the velocities making it self-starting and easily able to output the velocities for other calculations, e.g. kinetic energy.
+	
+	The velocity-Verlet method is given by
+	\begin{align}
+		x_{n+1} &= x_n + v_n\Delta t + \frac12 a_n\Delta t^2, \\
+		v_{n+1} &= v_n + \frac12\left( a_{n+1} + a_n\right)\Delta t.
+	\end{align}
+	
+	\subsection{Periodic boundary conditions}
+	To avoid having to deal with special boundary conditions, periodic boundary conditions are chosen where the potentials are calculated using the minimum image convention, i.e interactions with the closest image of the particle. When particle distances become greater than than half the box size in either dimension, the particle image is shifted back into the cell.
+	
+	However, care has to be taken when calculating properties based on distance such as diffusion. If only the images are saved, the particles can not diffuse more than a cell width in each direction so actual positions have to be calculated as well.
+	
+	\section{Implementation}
 	
 	\begin{figure}
 		\centering
